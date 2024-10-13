@@ -35,6 +35,8 @@ import dev.johnoreilly.confetti.settings.DefaultSettingsComponent
 import dev.johnoreilly.confetti.ui.ConfettiApp
 import dev.johnoreilly.confetti.ui.ConfettiTheme
 import dev.johnoreilly.confetti.ui.component.ConfettiBackground
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
@@ -81,9 +83,21 @@ class MainActivity : ComponentActivity() {
                     settingsComponent = settingsComponent
                 )
 
+
+                // TODO add for wear os client as well
+                //appComponent.setUser(authentication.currentUser.value)
+
                 appComponent to settingsComponent
             } ?: return
 
+
+        // TODO something similar needed for Wear OS?
+        lifecycleScope.launch {
+            authentication.currentUser
+                .collect {
+                    appComponent.first.setUser(it)
+                }
+        }
 
         // Update the theme settings
         lifecycleScope.launch {
